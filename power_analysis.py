@@ -2,6 +2,7 @@ import pandas
 import pymc3 as pm
 import warnings
 import arviz as az
+import numpy as np 
 from matplotlib import pyplot as plt
 warnings.filterwarnings('ignore')
 
@@ -10,17 +11,22 @@ class simulations:
     
     def __init__(
         self,
-        n_samples = 1000
+        v_observations,
+        v_conversions, 
+        c_observations, 
+        c_conversions,
+        n_samples = 1000,
+        
     ):
         self.n_samples = n_samples
         self.v_observations = v_observations
         self.v_conversions = v_conversions
-        self.c_observations = c_obvservations
+        self.c_observations = c_observations
         self.c_conversions = c_conversions 
-        self.v_current_trace = None 
-        self.c_current_trace = None 
+        self.v_current_trace = 1 
+        self.c_current_trace = 1
         self.difference = self.v_current_trace - self.c_current_trace
-        self.rel_difference=100*(self.v_current_trace-samples_posterior_control)/samples_posterior_control
+        self.rel_difference=100*(self.v_current_trace-self.c_current_trace)/self.v_current_trace
         self.hdi_prob = 0.95
         
     def run_models(self):
@@ -31,7 +37,7 @@ class simulations:
             prior=pm.Beta('Control', alpha = 1, beta= 1)  
 
             #fit the observed data
-            obs=pm.Binomial("Observed", n=c_obvservations, p=prior, observed=c_conversions)
+            obs=pm.Binomial("Observed", n=self.c_observations, p=prior, observed=self.c_conversions)
 
             trace_control = pm.sample(self.n_samples)
             self.c_current_trace = trace_control['Control']
@@ -42,7 +48,7 @@ class simulations:
             prior=pm.Beta('Variant', alpha=1, beta=1)  
 
             #fit the observed data to our model 
-            obs=pm.Binomial("Observed", n=v_observations, p=prior, observed=v_conversions)
+            obs=pm.Binomial("Observed", n=self.v_observations, p=prior, observed=self.v_conversions)
 
             trace_variant = pm.sample(self.n_samples)
             self.v_current_trace = trace_variant['Variant']
