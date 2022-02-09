@@ -61,16 +61,31 @@ class simulations:
         lower = round(((1-(self.hdi_prob))/2)*100, 1)
         upper = 100*self.hdi_prob+lower
         
-        data = self.rel_difference
+        
+        
+        
+        diff = self.v_current_trace - self.c_current_trace
+        output = 100*diff/self.c_current_trace
         
         if absolute: 
-            data = self.difference
+            output = diff
         
-
-        summary = az.summary(data, hdi_prob=self.hdi_prob)
+        
+        summary = az.summary(output, hdi_prob=self.hdi_prob)
 
         assert summary.columns[2] == 'hdi_{}%'.format(lower)
         assert summary.columns[3] == 'hdi_{}%'.format(upper)
+        
+        plt.rcParams["figure.figsize"] = (20,4)
+        plt.hist(self.c_current_trace, bins=40, label='posterior of control', density=True)
+        plt.hist(self.v_current_trace, bins=40, label='posterior of variant', density=True)
+        plt.xlabel('Value')
+        plt.ylabel('Density')
+        plt.title("Posterior distributions of the conversion rates of control and variant")
+        plt.legend()
+        plt.show()
+        
+        
 
 
         return(
