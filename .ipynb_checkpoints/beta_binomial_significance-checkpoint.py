@@ -3,11 +3,11 @@ import pymc3 as pm
 import warnings
 import arviz as az
 import numpy as np 
+import seaborn as sns
 from matplotlib import pyplot as plt
 warnings.filterwarnings('ignore')
 
-
-class simulations: 
+class beta_binomial_testing: 
     
     def __init__(
         self,
@@ -15,7 +15,7 @@ class simulations:
         v_conversions, 
         c_observations, 
         c_conversions,
-        n_samples = 1000,
+        n_samples = 5000,
         
     ):
         self.n_samples = n_samples
@@ -55,50 +55,57 @@ class simulations:
     
     
     def check_significance(self, absolute = False):
-
         #Not all values of hdi_prob area allowed
-
         lower = round(((1-(self.hdi_prob))/2)*100, 1)
         upper = 100*self.hdi_prob+lower
-        
-        
-        
-        
+
         diff = self.v_current_trace - self.c_current_trace
         output = 100*diff/self.c_current_trace
         
         if absolute: 
             output = diff
         
-        
         summary = az.summary(output, hdi_prob=self.hdi_prob)
 
-        assert summary.columns[2] == 'hdi_{}%'.format(lower)
-        assert summary.columns[3] == 'hdi_{}%'.format(upper)
-        
-        plt.rcParams["figure.figsize"] = (20,4)
-        plt.hist(self.c_current_trace, bins=40, label='posterior of control', density=True)
-        plt.hist(self.v_current_trace, bins=40, label='posterior of variant', density=True)
-        plt.xlabel('Value')
-        plt.ylabel('Density')
-        plt.title("Posterior distributions of the conversion rates of control and variant")
-        plt.legend()
-        plt.show()
-        
-        
-
-
+        assert summary.columns[2] == 'hdi_{}%'.format(lower), "hdi not found"
+        assert summary.columns[3] == 'hdi_{}%'.format(upper), "hdi not found"
+    
         return(
             not summary['hdi_{}%'.format(lower)][0] <= 0 <=  summary['hdi_{}%'.format(upper)][0], 
             summary['hdi_{}%'.format(lower)][0],
             summary['hdi_{}%'.format(upper)][0]
         )
     
-    def get_probability(self, threshold = None): 
+    
+    def plot_distributions(self): 
+        plt.rcParams["figure.figsize"] = (20,4)
+        sns.distplot(self.c_current_trace, bins=40, label='posterior of control')
+        sns.distplot(self.v_current_trace, bins=40, label='posterior of variant', density=True)
+        plt.xlabel('Rate')
+        plt.ylabel('Density')
+        plt.title("Posterior distributions of the control and variant conversion rates")
+        plt.legend()
+        plt.show()
+        
+    def plot_posterior_difference(self):
+        plt.rcParams["figure.figsize"] = (20,4)
+        sns.distplot(self.v_current_trace-self.c_current_trace, label='Difference between control and variant posterior distributions', bins = 40)
+        plt.xlabel('Rate')
+        plt.ylabel('Density')
+        plt.title("Posterior distributions of the control and variant conversion rates")
+        plt.legend()
+        plt.show()
         
         
-        
+    def get_probability(self): 
         return(f'Probability that Variant is better: {(self.v_current_trace > self.c_current_trace).mean():.1%}.')
+        return(f'Probability that Control is better: {(self.c_current_trace > self.v_current_trace).mean():.1%}.')
+    
+    def get_uplift(self): 
+        #Add uplift between means. 
+        
+    
+    
     
         
     
