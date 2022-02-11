@@ -1,27 +1,30 @@
-# Bayesian power simulations
+# Bayesian significance testing for ratios using beta-binomial. 
 
 ## Background
-This script should enable time estimations until significance is determined using bayesian beta-binomial combinattion. This is done by 
-executing two parallel posterior distributions where one is manipulated to show increased or decreased performance over time. This simulation can help you with: 
 
-1. Not panicking when a significant drop happens on the first day of test. 
-2. Properly picking your primary metrics when having tight deadlines. 
-2. Setting expectations of a test before a test is launched. 
+This script helps you calculate and visualize beta posterior distributions in a/b testing. It can be used to
 
-## Run test 
-Run the scrip, add your data points and the number of days you want to simulate. Input date could be tweaked.
+1. Compare the posterior distributions 
+
+![Posterior](posterior_comparing.png)
 
 
-## Example 
+2. Get posterior difference of (1). This helps you visually intepret significance by checking if the mass of this distribution is covering zero. 
 
-``python run power.py [1000, 1000, 20, 20, "day", "False"]``
+![Posterior](posterior_difference.png)
 
+3. Get the same posterior difference in uplift terms
 
-
-
-
-
+![Posterior](posterior_difference_uplift.png)
 
 
+4. Get the probabilities of the groups being better. 
 
+![Posterior](proba.png)
+
+
+**Stuff to add**
+
+* Credible interval bands 
+* Visualize mean values 
 

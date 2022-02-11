@@ -80,29 +80,32 @@ class beta_binomial_testing:
     def plot_distributions(self): 
         plt.rcParams["figure.figsize"] = (20,4)
         sns.distplot(self.c_current_trace, bins=40, label='posterior of control')
-        sns.distplot(self.v_current_trace, bins=40, label='posterior of variant', density=True)
+        sns.distplot(self.v_current_trace, bins=40, label='posterior of variant')
         plt.xlabel('Rate')
         plt.ylabel('Density')
         plt.title("Posterior distributions of the control and variant conversion rates")
         plt.legend()
         plt.show()
         
-    def plot_posterior_difference(self):
+    def plot_posterior_difference(self, relative = False):
         plt.rcParams["figure.figsize"] = (20,4)
-        sns.distplot(self.v_current_trace-self.c_current_trace, label='Difference between control and variant posterior distributions', bins = 40)
-        plt.xlabel('Rate')
-        plt.ylabel('Density')
-        plt.title("Posterior distributions of the control and variant conversion rates")
+        if relative:
+            sns.distplot(((self.v_current_trace-self.c_current_trace)/self.c_current_trace)*100, label='Relative between control and variant posterior distributions', bins = 40)
+            plt.xlabel('Uplift %')
+            plt.ylabel('Density')
+            plt.title("Uplift between control and variant")
+        else:
+            sns.distplot(self.v_current_trace-self.c_current_trace, label='Difference between control and variant posterior distributions', bins = 40)
+            plt.xlabel('Rate')
+            plt.ylabel('Density')
+            plt.title("Posterior difference")
         plt.legend()
         plt.show()
-        
         
     def get_probability(self): 
-        return(f'Probability that Variant is better: {(self.v_current_trace > self.c_current_trace).mean():.1%}.')
-        return(f'Probability that Control is better: {(self.c_current_trace > self.v_current_trace).mean():.1%}.')
+        print(f'Probability that variant is better: {(self.v_current_trace > self.c_current_trace).mean():.1%}.')
+        print(f'Probability that control is better: {(self.c_current_trace > self.v_current_trace).mean():.1%}.')
     
-    def get_uplift(self): 
-        #Add uplift between means. 
         
     
     
